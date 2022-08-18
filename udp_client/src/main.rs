@@ -34,10 +34,20 @@ fn main() -> io::Result<()> {
         let now = Instant::now();
         let (size, _src) = sock.recv_from(&mut data).unwrap();
         let _response = &data[0..size];
-        now.elapsed().as_millis()
+        now.elapsed().as_millis() as i32
     });
-    let duration: u128 = durations.iter().sum::<u128>() / durations.len() as u128;
-    println!("Average RTT: {}", duration);
+    let mean_duration: i32 = durations.iter().sum::<i32>() / durations.len() as i32;
+    let variance: f32 = durations
+        .iter()
+        .map(|value| {
+            let diff: i32 = mean_duration - value;
+            diff * diff
+        })
+        .sum::<i32>() as f32
+        / durations.len() as f32;
+    let std_deviation = variance.sqrt();
+    println!("Average RTT: {}", mean_duration);
+    println!("Standard Deviation: {}", std_deviation);
 
     Ok(())
 }
